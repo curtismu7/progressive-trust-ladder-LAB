@@ -1,0 +1,17 @@
+**/node_modules
+**/dist
+.env
+.env.*
+.git
+.github
+.githooks
+docs
+e2e
+scripts
+CHANGELOG.md
+Dockerfile
+LICENSE
+README.md
+docker-compose.yml
+test-results
+playwright-report

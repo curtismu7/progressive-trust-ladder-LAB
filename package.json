@@ -1,0 +1,33 @@
+{
+  "name": "progressive-trust-ladder",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Progressive trust ladder LAB (D29): public, signed in, step-up, CIBA approval. Demo tier. Mock only, no tenant, no outbound network.",
+  "license": "MIT",
+  "workspaces": [
+    "core",
+    "server",
+    "web"
+  ],
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "start": "npm start -w server",
+    "dev": "npm run dev -w web",
+    "build": "npm run build -w web",
+    "test": "npm test -w core && npm test -w server && npm test -w web && node --test scripts/*.test.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "reset": "node scripts/reset.mjs",
+    "prepare": "git config core.hooksPath .githooks || true",
+    "talk-track": "node scripts/build-talk-track.mjs",
+    "content-pack": "node scripts/validate-content-pack.mjs",
+    "e2e": "npm run build && playwright test -c e2e/playwright.config.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
+  }
+}

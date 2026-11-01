@@ -1,0 +1,16 @@
+{
+  "name": "progressive-trust-server",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Thin HTTP API over progressive-trust-core. Loopback, mock only, no outbound network.",
+  "license": "MIT",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "progressive-trust-core": "*"
+  }
+}

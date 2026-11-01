@@ -1,0 +1,49 @@
+{
+  "schema": "ptl-story/1",
+  "id": "bank",
+  "title": "{{vocab.firm}}: how a {{vocab.payment}} earns trust",
+  "subtitle": "Your {{cast.agent}} earns more trust as the risk and the amount rise. Each rung needs its own proof.",
+  "cast": {
+    "agent": "personal banking agent",
+    "customer": "you",
+    "approver": "the phone on your device",
+    "provider": "the sign-in service"
+  },
+  "vocab": {
+    "firm": "Vellum Savings",
+    "payment": "payment",
+    "payments": "payments",
+    "pay": "Pay",
+    "phone": "Mock phone",
+    "approver": "phone"
+  },
+  "rungs": [
+    {
+      "name": "Public",
+      "needs": "Browsing only. No sign-in."
+    },
+    {
+      "name": "Signed in",
+      "needs": "A sign-in proof from {{cast.provider}}, fresh for one hour."
+    },
+    {
+      "name": "Step-up satisfied",
+      "needs": "A fresh step-up check (5 minutes). {{vocab.payments}} up to 600."
+    },
+    {
+      "name": "CIBA approved",
+      "needs": "An approval from the {{vocab.approver}}, single use, 2 minutes. {{vocab.payments}} up to 1000."
+    }
+  ],
+  "ui": {
+    "ladderLabel": "Your rung",
+    "paymentHeading": "Risk and payment",
+    "phoneHeading": "{{vocab.phone}} (approver)",
+    "phoneNote": "This stands in for {{cast.approver}}. It is the only place a request is approved or denied.",
+    "outcome": {
+      "approved": "The {{vocab.approver}} approved. Rung 3: send the {{vocab.payment}} now.",
+      "denied": "The {{vocab.approver}} denied the request. The {{vocab.payment}} stays refused.",
+      "approval_expired": "The approval window ended before the {{vocab.payment}} was sent."
+    }
+  }
+}

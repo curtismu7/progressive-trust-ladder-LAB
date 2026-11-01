@@ -1,0 +1,8 @@
+#!/bin/sh
+# Refuse a commit that stages a secret. Required by the standalone rulebook: gitleaks must be installed (brew install gitleaks).
+# Enable with: git config core.hooksPath .githooks (documented in README.md and CLAUDE.md).
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks is required but not installed (brew install gitleaks); commit refused" >&2
+  exit 1
+fi
+exec gitleaks protect --staged --redact

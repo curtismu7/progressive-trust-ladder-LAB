@@ -1,0 +1,49 @@
+{
+  "schema": "ptl-story/1",
+  "id": "healthcare",
+  "title": "{{vocab.firm}}: how a {{vocab.payment}} earns trust",
+  "subtitle": "Your {{cast.agent}} handles claims for you and asks for more trust as the amount and the risk rise. Each rung needs its own proof.",
+  "cast": {
+    "agent": "care navigator",
+    "customer": "the member",
+    "approver": "the care app on the member's phone",
+    "provider": "the member sign-in"
+  },
+  "vocab": {
+    "firm": "Cedar Hollow Health",
+    "payment": "claim payment",
+    "payments": "claim payments",
+    "pay": "Pay claim",
+    "phone": "Care app",
+    "approver": "care app"
+  },
+  "rungs": [
+    {
+      "name": "Visitor",
+      "needs": "Reading plan details only. No sign-in."
+    },
+    {
+      "name": "Member signed in",
+      "needs": "A sign-in from {{cast.provider}}, fresh for one hour."
+    },
+    {
+      "name": "Member verified",
+      "needs": "A fresh identity check (5 minutes). {{vocab.payments}} up to 600."
+    },
+    {
+      "name": "Care-team approved",
+      "needs": "An approval from the {{vocab.approver}}, single use, 2 minutes. {{vocab.payments}} up to 1000."
+    }
+  ],
+  "ui": {
+    "ladderLabel": "Your access level",
+    "paymentHeading": "Risk and claim",
+    "phoneHeading": "{{vocab.phone}} (approver)",
+    "phoneNote": "This stands in for {{cast.approver}}. A claim is only released after that app approves it.",
+    "outcome": {
+      "approved": "The {{vocab.approver}} approved. Access level 3: submit the {{vocab.payment}} now.",
+      "denied": "The {{vocab.approver}} declined the request. The {{vocab.payment}} stays on hold.",
+      "approval_expired": "The approval window ended before the {{vocab.payment}} was submitted."
+    }
+  }
+}

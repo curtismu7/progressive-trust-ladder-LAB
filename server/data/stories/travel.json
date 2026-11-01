@@ -1,0 +1,49 @@
+{
+  "schema": "ptl-story/1",
+  "id": "travel",
+  "title": "{{vocab.firm}}: how a {{vocab.payment}} earns trust",
+  "subtitle": "Your {{cast.agent}} books trips for you and asks for more trust as the fare and the risk rise. Each rung needs its own proof.",
+  "cast": {
+    "agent": "travel assistant",
+    "customer": "the traveller",
+    "approver": "the trip app on the traveller's phone",
+    "provider": "the traveller sign-in"
+  },
+  "vocab": {
+    "firm": "Tessera Travel",
+    "payment": "booking",
+    "payments": "bookings",
+    "pay": "Book",
+    "phone": "Trip app",
+    "approver": "trip app"
+  },
+  "rungs": [
+    {
+      "name": "Browsing",
+      "needs": "Searching fares only. No sign-in."
+    },
+    {
+      "name": "Traveller signed in",
+      "needs": "A sign-in from {{cast.provider}}, fresh for one hour."
+    },
+    {
+      "name": "Traveller verified",
+      "needs": "A fresh identity check (5 minutes). {{vocab.payments}} up to 600."
+    },
+    {
+      "name": "Fare approved",
+      "needs": "An approval from the {{vocab.approver}}, single use, 2 minutes. {{vocab.payments}} up to 1000."
+    }
+  ],
+  "ui": {
+    "ladderLabel": "Your trust level",
+    "paymentHeading": "Risk and booking",
+    "phoneHeading": "{{vocab.phone}} (approver)",
+    "phoneNote": "This stands in for {{cast.approver}}. Nothing is booked until that app approves or declines it.",
+    "outcome": {
+      "approved": "The {{vocab.approver}} approved. Trust level 3: confirm the {{vocab.payment}} now.",
+      "denied": "The {{vocab.approver}} declined the request. The {{vocab.payment}} stays unconfirmed.",
+      "approval_expired": "The approval window ended before the {{vocab.payment}} was confirmed."
+    }
+  }
+}

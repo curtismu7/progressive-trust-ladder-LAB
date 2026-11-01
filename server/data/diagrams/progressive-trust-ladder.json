@@ -1,0 +1,38 @@
+{
+  "schema": "diagram-studio/1",
+  "id": "progressive-trust-ladder",
+  "title": "Progressive trust ladder",
+  "lede": "A personal agent climbs four rungs as risk and amount rise: sign-in, step-up, then a CIBA approval on a phone. MOCK: simulated, no tenant.",
+  "groups": {
+    "user": { "label": "Customer", "color": "dark" },
+    "agent": { "label": "Personal agent (app)", "color": "blue" },
+    "core": { "label": "Trust ladder (rules)", "color": "green" },
+    "mock": { "label": "Mock sign-in and CIBA store", "color": "grey" },
+    "phone": { "label": "Mock phone (approver only)", "color": "red" }
+  },
+  "nodes": [
+    { "id": "customer", "group": "user", "label": "Customer", "sub": ["Taps sign in, step up, or pay. Never sees a redirect."], "x": 0, "y": 60 },
+    { "id": "agent", "group": "agent", "label": "Personal agent", "sub": ["Shows the rung, the reason and the trace."], "x": 330, "y": 60 },
+    { "id": "ladder", "group": "core", "label": "Ladder core", "sub": ["Checks each proof: acr, auth_time, jti, window."], "x": 660, "y": 60 },
+    { "id": "proofs", "group": "mock", "label": "Mock proofs", "sub": ["Server-minted MOCK sign-in and step-up events."], "x": 330, "y": 300 },
+    { "id": "ciba", "group": "mock", "label": "CIBA store", "sub": ["Holds the backchannel request. Single use."], "x": 660, "y": 380 },
+    { "id": "phone", "group": "phone", "label": "Mock phone", "sub": ["The only way to approve or deny."], "x": 990, "y": 380 }
+  ],
+  "edges": [
+    { "source": "customer", "target": "agent", "label": "action" },
+    { "source": "agent", "target": "proofs", "label": "sign-in / step-up" },
+    { "source": "proofs", "target": "ladder", "label": "proof (jti, auth_time)" },
+    { "source": "agent", "target": "ciba", "label": "request (amount)" },
+    { "source": "phone", "target": "ciba", "label": "approve or deny" },
+    { "source": "agent", "target": "ladder", "label": "transact (amount)" },
+    { "source": "ciba", "target": "ladder", "label": "poll once", "dashed": true },
+    { "source": "ladder", "target": "agent", "label": "rung, reason, trace", "dashed": true }
+  ],
+  "steps": [
+    { "title": "Sign in: rung 0 to rung 1", "what": "The customer signs in. The server mints a MOCK sign-in proof and the ladder raises the rung once.", "why": "A proof raises one rung, and its jti is single use.", "hop": "sign-in", "edges": [0, 1, 2, 7] },
+    { "title": "Step-up: rung 1 to rung 2", "what": "A fresh MOCK step-up proof (acr mock:multi) satisfies the in-app check.", "why": "Step-up is needed for payments above 300. A proof older than 300 s is refused.", "hop": "step-up", "edges": [1, 2, 7] },
+    { "title": "Refused below rung 3", "what": "A payment of 800 needs rung 3. The ladder refuses it with rung_required and names the rung needed.", "why": "Risk and amount never lower a rung; they only raise what is needed.", "hop": "transact", "edges": [5, 7] },
+    { "title": "CIBA: the phone decides", "what": "The agent asks for an approval. Only the mock phone can approve or deny it.", "why": "The requester has no decide method; the approver is a separate handle.", "hop": "ciba", "edges": [3, 4, 6] },
+    { "title": "Approved payment: approval consumed", "what": "The agent polls once, rung 3 is reached, the payment goes through and the single-use approval is spent: rung 2 again.", "why": "Each CIBA approval pays one amount, once.", "hop": "consume", "edges": [6, 5, 7] }
+  ]
+}

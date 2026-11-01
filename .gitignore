@@ -1,0 +1,12 @@
+node_modules/
+coverage/
+.env
+.env.bak.*
+*.log
+.DS_Store
+.data/
+customer.config.json
+test-results/
+web/dist/
+dist/
+playwright-report/

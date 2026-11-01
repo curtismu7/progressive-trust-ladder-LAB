@@ -1,0 +1,25 @@
+# OrbStack:  docker compose up --build -d   ->  http://127.0.0.1:6211   (HOST_PORT must stay in 6200-6249)
+# The server binds 0.0.0.0 INSIDE the container (PTL_BIND is the opt-in), but the port is published on loopback only.
+# Do not change the 127.0.0.1 below.
+name: progressive-trust-ladder-lab
+
+services:
+  progressive-trust-ladder-lab:
+    build: .
+    ports:
+      - "127.0.0.1:${HOST_PORT:-6211}:6211"
+    environment:
+      PTL_PORT: "6211"
+      PTL_BIND: 0.0.0.0
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:6211/api/health').then(r=>r.json()).then(j=>process.exit(j.schema==='demo-health/1'&&j.state==='ready'?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      start_period: 5s
+      start_interval: 2s
+      timeout: 5s
+      retries: 3

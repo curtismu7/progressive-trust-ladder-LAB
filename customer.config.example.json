@@ -1,0 +1,7 @@
+{
+  "name": "Example Bank",
+  "vertical": "bank",
+  "brand": {
+    "primary": "#1f7a45"
+  }
+}

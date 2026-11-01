@@ -1,0 +1,10 @@
+{
+  "name": "progressive-trust-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Progressive trust ladder core (D29): pure rung model with mock step-up and CIBA. No network, no crypto.",
+  "license": "MIT",
+  "exports": { ".": "./src/index.js" },
+  "scripts": { "test": "node --test test/*.test.js" }
+}

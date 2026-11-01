@@ -1,0 +1,34 @@
+{
+  "schema": "demo-content-pack/1",
+  "id": "progressive-trust-ladder",
+  "title": "Progressive trust ladder LAB (D29)",
+  "version": "0.4.0",
+  "demo": {
+    "id": "progressive-trust-ladder",
+    "name": "Progressive trust ladder LAB",
+    "catalog": "D29",
+    "baseUrl": "http://127.0.0.1:6211",
+    "doctor": "/api/health",
+    "tags": ["step-up", "ciba", "risk", "mock", "demo-tier"]
+  },
+  "glossary": [
+    { "id": "rung", "term": "Rung", "definition": "One of four levels of trust a personal agent holds: public, signed in, step-up satisfied, CIBA approved. Each rung needs its own proof." },
+    { "id": "step-up", "term": "Step-up", "definition": "A fresh, stronger authentication required before a sensitive action. In this demo it is a MOCK check, not a real tenant policy." },
+    { "id": "ciba", "term": "CIBA", "definition": "Client-Initiated Backchannel Authentication: the requester asks for an approval and a separate device (here, a mock phone) decides." },
+    { "id": "acr", "term": "acr", "definition": "The authentication context class in a proof. This demo uses two MOCK values; the values a real PingOne issues are UNVERIFIED." },
+    { "id": "jti", "term": "jti", "definition": "A proof's unique id. A proof is single use: presenting it again is refused as a replay." },
+    { "id": "de-escalation", "term": "De-escalation", "definition": "A fall to a lower rung. It happens by an explicit step-down with a reason, by a proof window ending, or by a single-use approval being spent. Risk alone never lowers a rung." }
+  ],
+  "sources": [
+    { "id": "rfc9470", "title": "RFC 9470: OAuth 2.0 Step-up Authentication Challenge Protocol", "url": "https://www.rfc-editor.org/rfc/rfc9470", "kind": "standard", "use": "The insufficient_user_authentication challenge shape the demo mimics. Not read in full: the demo's challenge is a MOCK.", "status": "not-read", "checked": "2026-10-23" },
+    { "id": "openid-ciba", "title": "OpenID Connect Client-Initiated Backchannel Authentication Core 1.0", "url": "https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html", "kind": "standard", "use": "The backchannel request and poll model the mock CIBA store follows loosely. Limits in the demo are MOCK values.", "status": "not-read", "checked": "2026-10-23" }
+  ],
+  "cards": [
+    { "id": "try-ladder", "label": "Climb the ladder", "description": "Sign in, step up, then send a payment above 600 and watch the phone approval gate it.", "group": "try-it", "action": { "type": "route", "href": "/" }, "terms": ["rung", "ciba"] },
+    { "id": "read-rungs", "label": "What each rung proves", "description": "Four rungs, each with one MOCK proof and its window.", "group": "concept", "action": { "type": "route", "href": "/" }, "terms": ["rung", "acr", "jti"] },
+    { "id": "read-stepdown", "label": "Stepping down with a reason", "description": "How a rung falls, and why risk alone never lowers it.", "group": "concept", "action": { "type": "route", "href": "/" }, "terms": ["de-escalation", "step-up"] }
+  ],
+  "diagrams": [
+    { "id": "progressive-trust-ladder", "label": "Progressive trust ladder: flow and phone approval", "href": "/" }
+  ]
+}
