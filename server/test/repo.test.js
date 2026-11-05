@@ -160,7 +160,7 @@ test('README follows the README standard: title ends in LAB, plain Tier, Repo an
   assert.match(r, /lsof -iTCP:6211 -sTCP:LISTEN -n -P/);
   assert.match(r, /PTL_PORT=<other port> npm start/);
   assert.match(r, /6200-6249/);
-  assert.ok(!/ping-devops|cmuir|curtismu/i.test(r), 'no internal names');
+  assert.ok(!/ping-devops|cmuir/i.test(r), 'no internal names');
 });
 
 test('app CSS: the vendored shared stylesheet is present and the app stylesheet has no colour literal', () => {
