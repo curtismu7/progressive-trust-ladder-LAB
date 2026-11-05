@@ -13,6 +13,7 @@ import { DEFAULT_WORKSPACE, validWorkspaceId } from './workspace.js';
 import { LIVE_UNAVAILABLE } from './config.js';
 import { loadStories, DEFAULT_VERTICAL } from './stories.js';
 import { loadTalkTrack } from './talkTrack.js';
+import { shelfInfo } from './shelfLink.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const DEFAULT_WEB_DIST = path.resolve(HERE, '../../web/dist');
@@ -159,6 +160,7 @@ export function createApp({
   // Static UI from web/dist, when built. Only extension-less paths are UI routes; a missing asset is a 404.
   if (fs.existsSync(path.join(webDist, 'index.html'))) {
     const page = (res) => { res.set('Content-Security-Policy', CSP); res.set('Cache-Control', 'no-store'); };
+app.get('/api/shelf', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json(shelfInfo()); }); // the header "Shelf" button
     app.use(express.static(webDist, { index: false, setHeaders: (res, file) => { if (file.endsWith('.html')) page(res); } }));
     app.get(/^\/(?!api\/).*/, (req, res) => {
       if (path.extname(req.path)) return res.status(404).json({ error: 'not_found' });

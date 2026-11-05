@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import ShelfLink from "./components/ShelfLink.jsx";
 import { createApi } from './api.js';
 import { RUNG_NAMES as DEFAULT_NAMES, RUNG_NEEDS as DEFAULT_NEEDS, OUTCOME_TEXT, reasonText } from './copy.js';
 import { DiagramPanel } from './Diagram.jsx';
@@ -174,6 +175,7 @@ export function App({ api = DEFAULT_API } = {}) {
             {customer && customer.name ? <p className="muted" data-testid="customer-name">For <span className="customer">{customer.name}</span>.</p> : null}
           </div>
           <div className="head__tools">
+            <ShelfLink />
             <div className="seg" role="group" aria-label="Mode">
               <button type="button" aria-pressed="true" onClick={() => setLiveNote(null)} data-testid="mode-mock">Mock</button>
               <button type="button" aria-pressed="false" onClick={() => setLiveNote(liveMessage)} data-testid="mode-live">Live</button>
