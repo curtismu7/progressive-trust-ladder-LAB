@@ -34,8 +34,8 @@ export function forbiddenHosts() {
     const p = path.join(ROOT, rel);
     if (!fs.existsSync(p)) continue;
     for (const file of walk(p)) {
-      // The one URL the README standard requires (the repo under the ping-sandbox org) is not a foreign host.
-      const text = fs.readFileSync(file, 'utf8').replaceAll(/https:\/\/github\.com\/ping-sandbox\/[A-Za-z0-9._-]+/g, '');
+      // The one URL the README standard requires (the repo under the curtismu7 org) is not a foreign host.
+      const text = fs.readFileSync(file, 'utf8').replaceAll(/https:\/\/github\.com\/curtismu7\/[A-Za-z0-9._-]+/g, '');
       // Hosts named as URLs, or bare names under a common public TLD (not property accesses such as n.label).
       const names = [...text.matchAll(/https?:\/\/([^/\s"'`)<>]+)/gi)].map((m) => m[1].split(':')[0].toLowerCase()).filter((h) => !/[${}]/.test(h));
       names.push(...[...text.matchAll(/(?<!@)\b((?:[a-z0-9-]+\.)+(?:com|net|org|io|dev|co|uk|app|cloud|ai|gov|edu))\b/gi)].map((m) => m[1].toLowerCase()));

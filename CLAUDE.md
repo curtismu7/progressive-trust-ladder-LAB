@@ -1,6 +1,6 @@
 # progressive-trust-ladder-LAB (D29)
 
-Demo tier standalone, Node 26 only, Docker (OrbStack) only. A bank customer's personal agent moves up a ladder of trust as risk and payment size rise: 0 public, 1 signed in, 2 step-up satisfied, 3 CIBA approved. Each rung is gated by a proof. MOCK only: no tenant, no outbound network. Live is refused (no live provider). Repo: `ping-sandbox/progressive-trust-ladder-LAB` (internal; created by the owner).
+Demo tier standalone, Node 26 only, Docker (OrbStack) only. A bank customer's personal agent moves up a ladder of trust as risk and payment size rise: 0 public, 1 signed in, 2 step-up satisfied, 3 CIBA approved. Each rung is gated by a proof. MOCK only: no tenant, no outbound network. Live is refused (no live provider). Repo: `curtismu7/progressive-trust-ladder-LAB` (internal; created by the owner).
 
 ## Layout
 - `core/` pure rung model (`src/ladder.js`), mock CIBA store and approver (`src/ciba.js`), vendored step-up helpers (`src/stepup.js`). No I/O.
