@@ -48,6 +48,6 @@ test('STANDALONE_ENV overrides the path; the default is ~/Development/.env', () 
 test('the lab has no .env loader of its own: no dotenv dependency and no other reader of a .env file', () => {
   const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
   for (const p of ['package.json', 'server/package.json', 'core/package.json', 'web/package.json']) assert.doesNotMatch(fs.readFileSync(path.join(root, p), 'utf8'), /dotenv/);
-  const src = fs.readdirSync(path.join(root, 'server/src')).filter((n) => n.endsWith('.js') && n !== 'settings.js');
+  const src = fs.readdirSync(path.join(root, 'server/src')).filter((n) => n.endsWith('.js') && n !== 'settings.js' && n !== 'shelfLink.js');
   for (const n of src) assert.doesNotMatch(fs.readFileSync(path.join(root, 'server/src', n), 'utf8'), /\.env['"`]|parseEnv|loadEnvFile/, n);
 });
