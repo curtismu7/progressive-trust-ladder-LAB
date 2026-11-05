@@ -3,7 +3,7 @@
 A bank customer's personal agent starts public, with no sign-in, and needs more proof as risk and payment size rise: signed in, an in-app step-up, then a CIBA approval on a mock phone.
 
 Tier: Demo
-Repo: https://github.com/ping-sandbox/progressive-trust-ladder-LAB
+Repo: https://github.com/curtismu7/progressive-trust-ladder-LAB
 Catalog: D29 (a real row in the demo catalog, not a placeholder)
 
 ## What is simulated
@@ -19,7 +19,7 @@ The banner on the page says the same thing, on every view, and it stays in prese
 Prerequisites: Node 26 or newer. Docker only for the Docker form.
 
 ```sh
-git clone https://github.com/ping-sandbox/progressive-trust-ladder-LAB.git
+git clone https://github.com/curtismu7/progressive-trust-ladder-LAB.git
 cd progressive-trust-ladder-LAB
 npm ci
 npm run build          # the web UI into web/dist
