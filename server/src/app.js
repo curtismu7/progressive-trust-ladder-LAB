@@ -155,12 +155,12 @@ export function createApp({
   });
 
   api.use((_req, res) => res.status(404).json({ error: 'not_found' }));
+  app.get('/api/shelf', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json(shelfInfo()); }); // the header "Shelf" button
   app.use('/api', api);
 
   // Static UI from web/dist, when built. Only extension-less paths are UI routes; a missing asset is a 404.
   if (fs.existsSync(path.join(webDist, 'index.html'))) {
     const page = (res) => { res.set('Content-Security-Policy', CSP); res.set('Cache-Control', 'no-store'); };
-app.get('/api/shelf', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json(shelfInfo()); }); // the header "Shelf" button
     app.use(express.static(webDist, { index: false, setHeaders: (res, file) => { if (file.endsWith('.html')) page(res); } }));
     app.get(/^\/(?!api\/).*/, (req, res) => {
       if (path.extname(req.path)) return res.status(404).json({ error: 'not_found' });
