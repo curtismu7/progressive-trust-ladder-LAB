@@ -16,6 +16,13 @@ const TYPING = /^(INPUT|TEXTAREA|SELECT)$/;
 
 const DEFAULT_API = createApi();
 
+const THEME_KEY = "ptl.theme";
+const THEMES = [["auto", "Auto"], ["light", "Light"], ["dark", "Dark"]];
+function initialTheme() {
+  try { const t = localStorage.getItem(THEME_KEY); if (t === "light" || t === "dark") return t; } catch { /* storage blocked */ }
+  return "auto";
+}
+
 // The talk track is text from the server, rendered as text inside <pre>. It is never parsed as HTML.
 function TalkTrack({ api }) {
   const [track, setTrack] = useState(null);
@@ -71,6 +78,14 @@ export function App({ api = DEFAULT_API } = {}) {
   const [liveNote, setLiveNote] = useState(null); // the refusal text shown after Live is pressed; null while Mock is simply on
   const [liveMessage, setLiveMessage] = useState(LIVE_FALLBACK);
   const [resetSignal, setResetSignal] = useState(0); // raised by Reset; the diagram puts its boxes back
+  const [theme, setTheme] = useState(initialTheme);
+
+  useEffect(() => { if (theme === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = theme; }, [theme]);
+
+  const pickTheme = (next) => {
+    try { if (next === "auto") localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, next); } catch { /* not remembered */ }
+    setTheme(next);
+  };
 
   const refresh = useCallback(async () => {
     try {
@@ -181,6 +196,11 @@ export function App({ api = DEFAULT_API } = {}) {
               <button type="button" aria-pressed="false" onClick={() => setLiveNote(liveMessage)} data-testid="mode-live">Live</button>
             </div>
             <span className="chip" data-testid="mode">Mode: mock (offline)</span>
+            <label className="shell-theme">Theme
+              <select value={theme} onChange={(e) => pickTheme(e.target.value)}>
+                {THEMES.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+              </select>
+            </label>
             <button type="button" aria-pressed={presenter} onClick={() => setPresenter((v) => !v)}>
               {presenter ? 'Presenter mode: on (Esc)' : 'Presenter mode: off (P)'}
             </button>
