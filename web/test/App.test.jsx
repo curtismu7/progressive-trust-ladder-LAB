@@ -99,7 +99,7 @@ describe('the page', () => {
 });
 
 describe('the Mock | Live toggle', () => {
-  it('shows Mock on, and answers Live with an honest message while staying in Mock', async () => {
+  it('shows Mock on, Real is off with the server reason while unavailable, and a press does nothing', async () => {
     const { user } = setup();
     const mock = await screen.findByTestId('mode-mock');
     const live = screen.getByTestId('mode-live');
@@ -107,13 +107,15 @@ describe('the Mock | Live toggle', () => {
     expect(live).toHaveAttribute('aria-pressed', 'false');
     expect(screen.getByTestId('mode')).toHaveTextContent('Mode: mock (offline)');
     expect(screen.getByTestId('live-note')).toBeEmptyDOMElement();
+    await waitFor(() => expect(live).toHaveAttribute('aria-disabled', 'true')); // the server's /api/info says Real is unavailable
+    expect(live.getAttribute('title')).toMatch(/not available in this lab/); // with the how-to tooltip
     await user.click(live);
-    expect(screen.getByTestId('live-note')).toHaveTextContent('Live mode is not available in this lab');
+    expect(screen.getByTestId('live-note')).toBeEmptyDOMElement(); // a refused Real sends nothing and changes nothing
     expect(mock).toHaveAttribute('aria-pressed', 'true');
     expect(live).toHaveAttribute('aria-pressed', 'false');
     expect(screen.getByTestId('banner')).toHaveTextContent(/^MOCK\. Simulated\./);
     await user.click(mock);
-    expect(screen.getByTestId('live-note')).toBeEmptyDOMElement();
+    await waitFor(() => expect(screen.getByTestId('live-note')).toBeEmptyDOMElement());
   });
 });
 

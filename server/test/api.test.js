@@ -277,3 +277,21 @@ test('config says mock, that Live is not available and why, and carries no secre
   assert.equal('hosted' in r.json, false, 'there is no hosted build any more');
   assert.deepEqual(Object.keys(r.json).sort(), ['customer', 'live', 'mode']);
 }));
+
+// Rule 19: the Mock/Real toggle. This lab is mock-only: Real is honestly unavailable.
+test('rule 19: /api/info says mock-only, a Real switch is a 409 with the reason, and Mock always works', () => withApp(async (srv) => {
+  const info = await srv.call('GET', '/api/info');
+  assert.equal(info.status, 200);
+  assert.equal(info.json.source, 'mock');
+  assert.equal(info.json.realAvailable, false);
+  assert.match(info.json.realReason, /not available in this lab/);
+  const refused = await srv.call('POST', '/api/mode', { body: { source: 'real' } });
+  assert.equal(refused.status, 409);
+  assert.equal(refused.json.error, 'real_not_available');
+  assert.match(refused.json.message, /not available in this lab/);
+  const toMock = await srv.call('POST', '/api/mode', { body: { source: 'mock' } });
+  assert.equal(toMock.status, 200);
+  assert.equal(toMock.json.source, 'mock');
+  const bad = await srv.call('POST', '/api/mode', { body: { source: 'live' } });
+  assert.equal(bad.status, 400);
+}));

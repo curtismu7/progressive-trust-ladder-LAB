@@ -13,6 +13,9 @@ export function createApi(fetchImpl = globalThis.fetch.bind(globalThis)) {
   }
   return {
     config: () => call('GET', '/api/config'),
+    // Rule 19: the server-side Mock/Real toggle.
+    modeInfo: () => call('GET', '/api/info'),
+    setMode: (source) => call('POST', '/api/mode', { source }),
     story: () => call('GET', '/api/story'),
     talkTrack: () => call('GET', '/api/talk-track'),
     state: () => call('GET', '/api/state'),

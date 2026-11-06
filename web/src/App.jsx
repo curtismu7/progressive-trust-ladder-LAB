@@ -75,8 +75,9 @@ export function App({ api = DEFAULT_API } = {}) {
   const [loadError, setLoadError] = useState(null);
   const [customer, setCustomer] = useState(null); // { name, vertical, brand } from customer.config.json, or null
   const [story, setStory] = useState(null); // the vertical's pack (server-rendered text), or null before it loads
-  const [liveNote, setLiveNote] = useState(null); // the refusal text shown after Live is pressed; null while Mock is simply on
+  const [liveNote, setLiveNote] = useState(null); // the refusal text shown after Real is refused; null while Mock is simply on
   const [liveMessage, setLiveMessage] = useState(LIVE_FALLBACK);
+  const [modeInfo, setModeInfo] = useState(null); // GET /api/info; null = not known yet
   const [resetSignal, setResetSignal] = useState(0); // raised by Reset; the diagram puts its boxes back
   const [theme, setTheme] = useState(initialTheme);
 
@@ -109,7 +110,16 @@ export function App({ api = DEFAULT_API } = {}) {
       const style = document.documentElement.style;
       if (c.brand) { style.setProperty('--brand', c.brand.primary); style.setProperty('--brand-on', c.brand.on); } else { style.removeProperty('--brand'); style.removeProperty('--brand-on'); }
     }).catch(() => { /* the defaults stay */ });
+    // Rule 19: the server's /api/info decides whether Real is available and, when it is not, says why.
+    api.modeInfo().then((r) => { if (r.data && r.data.realAvailable === false) setModeInfo(r.data); }).catch(() => { /* the toggle still works against the fallback */ });
   }, [api]);
+  // Rule 19: switching calls POST /api/mode. Real is refused here (409 with the server's reason); Mock always works.
+  const switchMode = useCallback(async (source) => {
+    const r = await api.setMode(source);
+    if (r.status >= 400) { setLiveNote(r.data?.message || liveMessage); return; }
+    setLiveNote(null);
+    await refresh();
+  }, [api, liveMessage, refresh]);
   // Every 2 s the page ticks the server: window checks and the requester's CIBA poll (at most once per 5 s interval).
   // Reads (GET) change nothing on the server; the tick is the only periodic write.
   useEffect(() => {
@@ -191,9 +201,11 @@ export function App({ api = DEFAULT_API } = {}) {
           </div>
           <div className="head__tools">
             <ShelfLink />
-            <div className="seg" role="group" aria-label="Mode">
-              <button type="button" aria-pressed="true" onClick={() => setLiveNote(null)} data-testid="mode-mock">Mock</button>
-              <button type="button" aria-pressed="false" onClick={() => setLiveNote(liveMessage)} data-testid="mode-live">Live</button>
+            <div className="seg mode-toggle" role="group" aria-label="Mode">
+              <button type="button" aria-pressed="true" onClick={() => switchMode('mock')} data-testid="mode-mock">Mock</button>
+              <button type="button" aria-pressed="false" aria-disabled={modeInfo?.realAvailable === false ? 'true' : undefined}
+                title={modeInfo?.realAvailable === false ? (modeInfo.realReason || liveMessage) : undefined}
+                onClick={() => { if (modeInfo?.realAvailable !== false) switchMode('real'); }} data-testid="mode-live">Live</button>
             </div>
             <span className="chip" data-testid="mode">Mode: mock (offline)</span>
             <label className="shell-theme">Theme

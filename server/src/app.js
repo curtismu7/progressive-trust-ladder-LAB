@@ -79,6 +79,15 @@ export function createApp({
     res.json({ schema: 'demo-health/1', at: new Date(clock()).toISOString(), state: 'ready', runtime: 'mock', demo: { id: 'progressive-trust-ladder', name: 'Progressive trust ladder', version: VERSION } });
   });
   api.get('/config', (_req, res) => res.json({ mode: 'mock', live: { available: false, message: LIVE_UNAVAILABLE }, customer: { name: customer.name ?? null, vertical: customer.vertical ?? null, brand: customer.brand ?? null } }));
+  // Rule 19: the Mock/Real toggle. This lab has no live provider or tenant, so Real is honestly unavailable;
+  // the toggle still exists and a Real switch is a 409 with the reason.
+  api.get('/info', (_req, res) => res.json({ source: 'mock', realAvailable: false, realReason: LIVE_UNAVAILABLE }));
+  api.post('/mode', (req, res) => {
+    const source = req.body?.source;
+    if (source !== 'mock' && source !== 'real') return res.status(400).json({ error: 'bad_request', message: 'source must be exactly "mock" or "real"' });
+    if (source === 'real') return res.status(409).json({ error: 'real_not_available', message: LIVE_UNAVAILABLE });
+    res.json({ source: 'mock', realAvailable: false, realReason: LIVE_UNAVAILABLE });
+  });
   api.get('/story', (_req, res) => res.json(story));
   api.get('/talk-track', (_req, res) => res.json(talkTrack));
   api.get('/diagrams', (_req, res) => res.json({ ids: DIAGRAM_IDS }));
