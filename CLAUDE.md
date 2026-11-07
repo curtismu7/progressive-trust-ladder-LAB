@@ -33,5 +33,5 @@ Demo tier standalone, Node 26 only, Docker (OrbStack) only. A bank customer's pe
 - Story packs: every `{{cast.*}}` and `{{vocab.*}}` token must resolve in every vertical. Fictional names only. Customer config: no purple, no markup, no credential-looking key, under 64 KB; never commit `customer.config.json`.
 - No k8s, SE or hosted-mode code (deferred by the owner). Docker publishes `127.0.0.1` only.
 - Never print the forbidden-strings file. History scan: `git log -p --all | grep -cF -f ~/.config/demo-kit/forbidden-strings.txt` must print 0.
-- Commits end with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`; never `--no-verify`.
+- Commits and PR bodies carry no AI-attribution credit of any kind (owner rule 2026-11-07; enforced by `scripts/check-no-ai-attribution.sh`); never `--no-verify`.
 - Lock file: keep npm-version churn out of commits (a plain `npm update` rewrote `libc` fields in 2026-10; edit the one entry by hand).
