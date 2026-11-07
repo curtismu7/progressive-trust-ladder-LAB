@@ -186,7 +186,7 @@ test('a dragged diagram box goes back to its place on Reset diagram', async ({ p
   }).toBeLessThan(2);
 });
 
-test('the header toggle is Mock | Live: Mock is on, and Live is refused with an honest message', async ({ page }) => {
+test('the header toggle is Mock | Live: Mock is on, and Live is disabled with a how-to tooltip and refused with a 409 (rule 19)', async ({ page }) => {
   await page.goto('/');
   const mock = page.getByTestId('mode-mock');
   const live = page.getByTestId('mode-live');
@@ -194,13 +194,23 @@ test('the header toggle is Mock | Live: Mock is on, and Live is refused with an 
   await expect(live).toHaveAttribute('aria-pressed', 'false');
   await expect(page.getByTestId('mode')).toHaveText('Mode: mock (offline)');
   await expect(page.getByTestId('live-note')).toBeHidden();
-  await live.click();
-  await expect(page.getByTestId('live-note')).toContainText('Live mode is not available in this lab');
+  // Real is not configured: the button is aria-disabled (Playwright's click() would wait for it forever) and carries the reason as its tooltip.
+  await expect(live).toHaveAttribute('aria-disabled', 'true');
+  await expect(live).toHaveAttribute('title', /Live mode is not available in this lab/);
+  await live.click({ force: true }); // a press does nothing: no request, no change
+  await expect(page.getByTestId('live-note')).toBeHidden();
   await expect(mock).toHaveAttribute('aria-pressed', 'true');
   await expect(live).toHaveAttribute('aria-pressed', 'false');
   await expect(page.getByTestId('banner')).toContainText('MOCK. Simulated.');
+  // The server answers 409 for Real and stays in mock.
+  const base = new URL(page.url()).origin;
+  const refused = await page.request.post('/api/mode', { data: { source: 'real' }, headers: { origin: base } });
+  expect(refused.status()).toBe(409);
+  expect((await refused.json()).message).toMatch(/Live mode is not available in this lab/);
+  expect((await (await page.request.get('/api/info')).json())).toMatchObject({ source: 'mock', realAvailable: false });
   await mock.click();
   await expect(page.getByTestId('live-note')).toBeHidden();
+  await expect(mock).toHaveAttribute('aria-pressed', 'true');
 });
 
 test('presenter mode: P toggles it, Esc leaves it, the banner stays, modifier keys and typing in a field do nothing', async ({ page }) => {
