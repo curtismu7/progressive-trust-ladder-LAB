@@ -184,3 +184,7 @@ test('no k8s, SE, hosted, bare MODE or EC key generation is left in the repo', (
   }
   assert.deepEqual(hits, []);
 });
+
+test('docker-compose passes a usable SHELF_URL into the container (the shelf button needs it)', () => {
+  assert.match(read('docker-compose.yml'), /^\s*SHELF_URL: \$\{SHELF_URL:-http:\/\/127\.0\.0\.1:4400\}\s*$/m);
+});
