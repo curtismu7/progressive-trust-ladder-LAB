@@ -84,3 +84,49 @@ test('GET requests are same-origin checked too: a foreign Origin on a read is re
   assert.equal(r.status, 403);
   assert.equal(r.json.error, 'cross_origin');
 }));
+
+// Behind the family lab-proxy (https://local.ping-devops.com:8443): Host is this lab's LAB_ALLOWED_HOSTS name with its port,
+// the browser's Origin is the proxy's, and the proxy says so in X-Forwarded-Host/-Proto.
+test('lab-proxy: LAB_ALLOWED_HOSTS parsing', async () => {
+  const { parseAllowedHosts } = await import('../src/guards.js');
+  assert.deepEqual([...parseAllowedHosts({})], []);
+  assert.deepEqual([...parseAllowedHosts({ LAB_ALLOWED_HOSTS: ' Progressive-Trust-Ladder.local.ping-devops.com , ' })], ['progressive-trust-ladder.local.ping-devops.com']);
+  for (const bad of ['a.example:6211', 'https://a.example', 'a b']) assert.throws(() => parseAllowedHosts({ LAB_ALLOWED_HOSTS: bad }), /not a host name/);
+});
+
+test('lab-proxy: launcher Host accepted, proxied same-origin write accepted, everything else still refused', async () => {
+  const name = 'progressive-trust-ladder.local.ping-devops.com';
+  const srv = await startApp({ allowedHosts: new Set([name]), port: 6211 });
+  try {
+    const proxy = 'https://local.ping-devops.com:8443';
+    const fwd = { 'x-forwarded-host': 'local.ping-devops.com:8443', 'x-forwarded-proto': 'https' };
+    const launcher = `${name}:6211`;
+    // launcher Host accepted (and loopback still is)
+    assert.equal((await srv.call('GET', '/api/health', { headers: { host: launcher } })).status, 200);
+    assert.equal((await srv.call('GET', '/api/health')).status, 200);
+    // proxied same-origin write accepted
+    const ok = await srv.call('POST', '/api/mode', { body: { source: 'mock' }, headers: { host: launcher, ...fwd, origin: proxy, 'sec-fetch-site': 'same-origin' } });
+    assert.equal(ok.status, 200, ok.text);
+    // foreign Origin refused, and an Origin that does not match the forwarded host or scheme
+    for (const origin of ['https://evil.example', 'http://local.ping-devops.com:8443', 'https://local.ping-devops.com']) {
+      const r = await srv.call('POST', '/api/mode', { body: { source: 'mock' }, headers: { host: launcher, ...fwd, origin } });
+      assert.equal(r.status, 403, origin);
+      assert.equal(r.json.error, 'cross_origin');
+    }
+    assert.equal((await srv.call('POST', '/api/mode', { body: { source: 'mock' }, headers: { host: launcher, 'x-forwarded-host': 'local.ping-devops.com:8443', 'x-forwarded-proto': 'ftp', origin: 'ftp://local.ping-devops.com:8443' } })).status, 403);
+    assert.equal((await srv.call('POST', '/api/mode', { body: { source: 'mock' }, headers: { host: launcher, 'x-forwarded-host': '', 'x-forwarded-proto': 'https', origin: 'https://' } })).status, 403);
+    // forwarded headers on a loopback Host are ignored
+    for (const host of [`127.0.0.1:${srv.port}`, `localhost:${srv.port}`]) {
+      assert.equal((await srv.call('POST', '/api/mode', { body: { source: 'mock' }, headers: { host, ...fwd, origin: proxy } })).status, 403, host);
+    }
+    // a Host outside the set is refused: the bare proxy name, another name, the right name on another port, no port
+    for (const host of ['local.ping-devops.com:6211', 'local.ping-devops.com:8443', 'evil.example:6211', `${name}:6212`, name]) {
+      const r = await srv.call('GET', '/api/health', { headers: { host } });
+      assert.equal(r.status, 403, host);
+      assert.equal(r.json.error, 'bad_host');
+    }
+  } finally { await srv.close(); }
+  // without LAB_ALLOWED_HOSTS the launcher Host is refused
+  const plain = await startApp({ allowedHosts: new Set(), port: 6211 });
+  try { assert.equal((await plain.call('GET', '/api/health', { headers: { host: `${name}:6211` } })).status, 403); } finally { await plain.close(); }
+});

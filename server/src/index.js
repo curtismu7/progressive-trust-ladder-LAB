@@ -6,10 +6,12 @@ const { applySharedSettings } = await import('./settings.js');
 applySharedSettings();
 const { resolvePort, resolveBind, resolveLabMode, liveRequested, LIVE_UNAVAILABLE } = await import('./config.js');
 const { createApp } = await import('./app.js');
+const { parseAllowedHosts } = await import('./guards.js');
 const { resolveWorkspace } = await import('./workspace.js');
 const { loadCustomerConfig, DEFAULT_FILE } = await import('./customerConfig.js');
 const { loadStories } = await import('./stories.js');
 
+const allowedHosts = parseAllowedHosts(); // the lab-proxy's names; before any server or timer starts
 const port = resolvePort();
 const host = resolveBind();
 const mode = resolveLabMode();
@@ -22,7 +24,7 @@ if (customer.errors.length) {
   for (const e of customer.errors) console.error(`  - ${e}`);
   process.exit(1);
 }
-const server = createApp({ workspace, customer: customer.config, stories }).listen(port, host, () => {
+const server = createApp({ workspace, customer: customer.config, stories, allowedHosts, port }).listen(port, host, () => {
   const addr = server.address();
   console.log(`[progressive-trust-ladder] ${mode.toUpperCase()}, simulated, no tenant, workspace ${workspace}: http://${host}:${addr.port}/ (API /api/health)`);
 });
