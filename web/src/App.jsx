@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import ShelfLink from "./components/ShelfLink.jsx";
+// Opened from Customer Agent LAB (UC23 routes here): strip below the banner + header Back only; nothing is preselected.
+import ReturnLink from "./return-link/ReturnLink.jsx";
 import { createApi } from './api.js';
 import { RUNG_NAMES as DEFAULT_NAMES, RUNG_NEEDS as DEFAULT_NEEDS, OUTCOME_TEXT, reasonText } from './copy.js';
 import { DiagramPanel } from './Diagram.jsx';
@@ -193,6 +195,7 @@ export function App({ api = DEFAULT_API } = {}) {
     <div className={presenter ? 'app app--presenter' : 'app'}>
       <header>
         <p className="banner" role="note" data-state="mock" data-testid="banner">{BANNER}</p>
+        <ReturnLink app="progressive-trust-ladder" />
         <div className="head">
           <div>
             <h1>Progressive trust ladder LAB</h1>
@@ -200,6 +203,7 @@ export function App({ api = DEFAULT_API } = {}) {
             {customer && customer.name ? <p className="muted" data-testid="customer-name">For <span className="customer">{customer.name}</span>.</p> : null}
           </div>
           <div className="head__tools">
+            <ReturnLink app="progressive-trust-ladder" variant="header" />
             <ShelfLink />
             <div className="seg mode-toggle" role="group" aria-label="Mode">
               <button type="button" aria-pressed="true" onClick={() => switchMode('mock')} data-testid="mode-mock">Mock</button>
