@@ -48,6 +48,12 @@ test('docker-compose publishes only on 127.0.0.1 and on the default port', () =>
   assert.match(text, new RegExp(`\\$\\{HOST_PORT:-${DEFAULT_PORT}\\}:${DEFAULT_PORT}"`));
 });
 
+test('docker-compose allows the lab-proxy name for this lab by default, never the bare proxy name', () => {
+  const m = /LAB_ALLOWED_HOSTS: \$\{LAB_ALLOWED_HOSTS:-([^}]*)\}/.exec(read('docker-compose.yml'));
+  assert.ok(m, 'LAB_ALLOWED_HOSTS has a default');
+  assert.deepEqual(m[1].split(',').map((n) => n.trim()), ['progressive-trust-ladder.local.ping-devops.com']);
+});
+
 test('the port parser flags an unbound or wildcard publish', () => {
   for (const bad of ['- "6211:6211"', '- "0.0.0.0:6211:6211"', '- 6211', '- "::1:6211:6211"']) {
     const ports = publishedPorts(`services:\n  a:\n    ports:\n      ${bad}\n`);

@@ -6,11 +6,11 @@ import path from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
-import { hostCheck, sameOriginWrites } from './guards.js';
+import { makeHostCheck, makeSameOriginWrites, parseAllowedHosts } from './guards.js';
 import { createSession } from './session.js';
 import { loadDiagrams, DIAGRAM_IDS } from './diagrams.js';
 import { DEFAULT_WORKSPACE, validWorkspaceId } from './workspace.js';
-import { LIVE_UNAVAILABLE } from './config.js';
+import { LIVE_UNAVAILABLE, resolvePort } from './config.js';
 import { loadStories, DEFAULT_VERTICAL } from './stories.js';
 import { loadTalkTrack } from './talkTrack.js';
 import { shelfInfo } from './shelfLink.js';
@@ -47,7 +47,7 @@ const validAmount = (v) => Number.isSafeInteger(v) && v >= 1 && v <= MAX_AMOUNT;
 
 export function createApp({
   clock = () => Date.now(), webDist = DEFAULT_WEB_DIST, diagrams = loadDiagrams(), workspace = DEFAULT_WORKSPACE,
-  customer = {}, stories = loadStories(), talkTrack = loadTalkTrack(),
+  customer = {}, stories = loadStories(), talkTrack = loadTalkTrack(), allowedHosts = parseAllowedHosts(), port = resolvePort(),
 } = {}) {
   if (!validWorkspaceId(workspace)) throw new TypeError('createApp: workspace must match [a-z0-9-]{1,32}');
   const story = stories.get(customer.vertical || DEFAULT_VERTICAL);
@@ -57,8 +57,8 @@ export function createApp({
 
   const app = express();
   app.disable('x-powered-by');
-  app.use(hostCheck);
-  app.use(sameOriginWrites);
+  app.use(makeHostCheck({ allowed: allowedHosts, port }));
+  app.use(makeSameOriginWrites({ allowed: allowedHosts, port }));
   app.use((_req, res, next) => { res.set('X-Content-Type-Options', 'nosniff'); res.set('Cache-Control', 'no-store'); next(); });
 
   // Runs one state change, traces it, and answers with the result, the rung, the reason and the trace entry.

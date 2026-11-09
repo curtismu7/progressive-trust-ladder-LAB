@@ -12,6 +12,8 @@ services:
       SHELF_URL: ${SHELF_URL:-http://127.0.0.1:4400}
       PTL_PORT: "6211"
       PTL_BIND: 0.0.0.0
+      # The name the family lab-proxy (https://local.ping-devops.com:8443) sends in Host; loopback always works.
+      LAB_ALLOWED_HOSTS: ${LAB_ALLOWED_HOSTS:-progressive-trust-ladder.local.ping-devops.com}
     read_only: true
     tmpfs:
       - /tmp
