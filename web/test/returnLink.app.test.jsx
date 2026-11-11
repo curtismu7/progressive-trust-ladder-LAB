@@ -45,6 +45,15 @@ describe('return link', () => {
     }
   });
 
+  it('?from=ai-demo-standalone: strip named for AI Demo Standalone, Back to its fixed proxy path', async () => {
+    window.history.replaceState(null, '', '/progressive-trust-ladder/?from=ai-demo-standalone&uc=UC12');
+    show();
+    const note = await screen.findByRole('note', { name: 'Opened from AI Demo Standalone' });
+    expect(note.textContent).toContain('UC12');
+    expect(screen.getAllByRole('button', { name: /Back to AI Demo Standalone/ })).toHaveLength(2);
+    expect(returnLinkFor('progressive-trust-ladder').href).toBe('/ai-demo-standalone/?returned=progressive-trust-ladder&uc=UC12');
+  });
+
   it("Back goes to the proxy path behind the lab proxy, to the direct URL on the app's own port", () => {
     window.history.replaceState(null, '', '/progressive-trust-ladder/?from=customer-agent&uc=UC23');
     expect(returnLinkFor('progressive-trust-ladder').href).toBe('/customer-agent/?returned=progressive-trust-ladder&uc=UC23');
