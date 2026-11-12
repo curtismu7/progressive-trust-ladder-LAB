@@ -1,5 +1,6 @@
 /* App layout only. Colours, fonts, controls and the dark theme come from styles/standalone-ui.css (loaded first). Tokens only here:
    no colour literals, no dark-mode media queries, no forced priority, breakpoints 600px and 900px only, no purple. */
+html { font-size: var(--fs, 16px); }
 .app { max-width: 1040px; margin: 0 auto; padding: 0 0 32px; }
 h1 { font-size: 24px; margin: 0 0 4px; }
 h2 { font-size: 18px; margin: 0 0 8px; }

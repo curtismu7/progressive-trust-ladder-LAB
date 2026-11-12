@@ -30,8 +30,8 @@ describe('return link', () => {
     const note = await screen.findByRole('note', NOTE);
     expect(note.textContent).toContain('UC23');
     expect(screen.getByTestId('banner').nextElementSibling).toBe(note);
-    expect(document.querySelector('.head__tools > button.return-link--header')).not.toBeNull();
-    expect(screen.getAllByRole('button', { name: /Back to Customer Agent LAB/ })).toHaveLength(2);
+    expect(document.querySelector('.head__tools a.return-link, .head__tools button.return-link')).toBeNull(); // the header Back is gone: the TopMenu replaced it
+    expect(screen.getAllByRole('button', { name: /Back to Customer Agent LAB/ })).toHaveLength(1); // the header Back is gone: the TopMenu replaced it
   });
 
   it('no from, an unknown from or a bad id: no strip, no button', async () => {
@@ -50,7 +50,7 @@ describe('return link', () => {
     show();
     const note = await screen.findByRole('note', { name: 'Opened from AI Demo Standalone' });
     expect(note.textContent).toContain('UC12');
-    expect(screen.getAllByRole('button', { name: /Back to AI Demo Standalone/ })).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /Back to AI Demo Standalone/ })).toHaveLength(1); // the header Back is gone: the TopMenu replaced it
     expect(returnLinkFor('progressive-trust-ladder').href).toBe('/ai-demo-standalone/?returned=progressive-trust-ladder&uc=UC12');
   });
 

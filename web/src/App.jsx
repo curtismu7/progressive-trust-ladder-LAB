@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import ShelfLink from "./components/ShelfLink.jsx";
+import TopMenu, { applyFontSize } from './top-menu/TopMenu.jsx';
 // Opened from Customer Agent LAB (UC23 routes here): strip below the banner + header Back only; nothing is preselected.
 import ReturnLink from "./return-link/ReturnLink.jsx";
 import { createApi } from './api.js';
@@ -19,10 +20,14 @@ const TYPING = /^(INPUT|TEXTAREA|SELECT)$/;
 const DEFAULT_API = createApi();
 
 const THEME_KEY = "ptl.theme";
-const THEMES = [["auto", "Auto"], ["light", "Light"], ["dark", "Dark"]];
+const THEMES = ["auto", "light", "dark"];
 function initialTheme() {
-  try { const t = localStorage.getItem(THEME_KEY); if (t === "light" || t === "dark") return t; } catch { /* storage blocked */ }
+  try { const t = localStorage.getItem(THEME_KEY); if (THEMES.includes(t)) return t; } catch { /* storage blocked */ }
   return "auto";
+}
+const FONT_KEY = "ptl.font";
+function initialFontStep() {
+  try { const f = localStorage.getItem(FONT_KEY); return ["S", "M", "L"].includes(f) ? f : "M"; } catch { return "M"; }
 }
 
 // The talk track is text from the server, rendered as text inside <pre>. It is never parsed as HTML.
@@ -82,6 +87,7 @@ export function App({ api = DEFAULT_API } = {}) {
   const [modeInfo, setModeInfo] = useState(null); // GET /api/info; null = not known yet
   const [resetSignal, setResetSignal] = useState(0); // raised by Reset; the diagram puts its boxes back
   const [theme, setTheme] = useState(initialTheme);
+  const [fontStep, setFontStep] = useState(initialFontStep);
 
   useEffect(() => { if (theme === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = theme; }, [theme]);
 
@@ -89,6 +95,11 @@ export function App({ api = DEFAULT_API } = {}) {
     try { if (next === "auto") localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, next); } catch { /* not remembered */ }
     setTheme(next);
   };
+
+  useEffect(() => {
+    applyFontSize(fontStep);
+    try { localStorage.setItem(FONT_KEY, fontStep); } catch { /* not remembered */ }
+  }, [fontStep]);
 
   const refresh = useCallback(async () => {
     try {
@@ -203,24 +214,19 @@ export function App({ api = DEFAULT_API } = {}) {
             {customer && customer.name ? <p className="muted" data-testid="customer-name">For <span className="customer">{customer.name}</span>.</p> : null}
           </div>
           <div className="head__tools">
-            <ReturnLink app="progressive-trust-ladder" variant="header" />
-            <ShelfLink />
-            <div className="seg mode-toggle" role="group" aria-label="Mode">
-              <button type="button" aria-pressed="true" onClick={() => switchMode('mock')} data-testid="mode-mock">Mock</button>
-              <button type="button" aria-pressed="false" aria-disabled={modeInfo?.realAvailable === false ? 'true' : undefined}
-                title={modeInfo?.realAvailable === false ? (modeInfo.realReason || liveMessage) : undefined}
-                onClick={() => { if (modeInfo?.realAvailable !== false) switchMode('real'); }} data-testid="mode-live">Live</button>
-            </div>
+            <TopMenu
+              mode={{ value: 'mock', onChange: switchMode, realAvailable: modeInfo ? modeInfo.realAvailable : null, realHint: modeInfo?.realReason || liveMessage }}
+              theme={{ value: theme, onChange: pickTheme }}
+              fontSize={{ value: fontStep, onChange: setFontStep }}
+              present={{ active: presenter, onToggle: () => setPresenter((v) => !v), label: 'Presenter mode: on (Esc)' }}
+              help={{ href: 'https://github.com/curtismu7/progressive-trust-ladder-LAB#readme' }}
+              version={modeInfo?.version || null}
+              onReset={resetAll}
+            >
+              <ShelfLink />
+            </TopMenu>
             <span className="chip" data-testid="mode">Mode: mock (offline)</span>
-            <label className="shell-theme">Theme
-              <select value={theme} onChange={(e) => pickTheme(e.target.value)}>
-                {THEMES.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
-              </select>
-            </label>
-            <button type="button" aria-pressed={presenter} onClick={() => setPresenter((v) => !v)}>
-              {presenter ? 'Presenter mode: on (Esc)' : 'Presenter mode: off (P)'}
-            </button>
-            <button type="button" className="danger" onClick={resetAll}>Reset</button>
+            {/* Sign in here is a mock in-page ladder rung in the card below, not a real authentication flow, so it stays outside the menu. */}
           </div>
         </div>
         <p className="notice" aria-live="polite" data-testid="live-note">{liveNote}</p>
