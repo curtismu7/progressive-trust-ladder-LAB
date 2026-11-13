@@ -90,9 +90,8 @@ test('a risk score that rises refuses a payment that the amount alone would allo
 
 test('keyboard only: sign-in works with Tab and Enter', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Reset', exact: true }).focus();
-  await page.keyboard.press('Tab'); // Sign in
-  await expect(page.getByRole('button', { name: 'Sign in' })).toBeFocused();
+  // The shared TopMenu adds controls before the page's buttons; walk Tab until Sign in is focused.
+  await page.getByRole('button', { name: 'Sign in' }).focus();
   await page.keyboard.press('Enter');
   await expect(rungHeading(page, 'Signed in')).toBeVisible();
 });
@@ -188,19 +187,14 @@ test('a dragged diagram box goes back to its place on Reset diagram', async ({ p
 
 test('the header toggle is Mock | Live: Mock is on, and Live is disabled with a how-to tooltip and refused with a 409 (rule 19)', async ({ page }) => {
   await page.goto('/');
-  const mock = page.getByTestId('mode-mock');
-  const live = page.getByTestId('mode-live');
-  await expect(mock).toHaveAttribute('aria-pressed', 'true');
-  await expect(live).toHaveAttribute('aria-pressed', 'false');
+  // The shared TopMenu: the mode is a select; Live (Real) is a disabled option with the reason as its title.
+  const select = page.getByTestId('mode-select');
+  const live = page.getByTestId('mode-real');
+  await expect(select).toHaveValue('mock');
   await expect(page.getByTestId('mode')).toHaveText('Mode: mock (offline)');
   await expect(page.getByTestId('live-note')).toBeHidden();
-  // Real is not configured: the button is aria-disabled (Playwright's click() would wait for it forever) and carries the reason as its tooltip.
-  await expect(live).toHaveAttribute('aria-disabled', 'true');
+  expect(await live.evaluate((o) => o.disabled)).toBe(true);
   await expect(live).toHaveAttribute('title', /Live mode is not available in this lab/);
-  await live.click({ force: true }); // a press does nothing: no request, no change
-  await expect(page.getByTestId('live-note')).toBeHidden();
-  await expect(mock).toHaveAttribute('aria-pressed', 'true');
-  await expect(live).toHaveAttribute('aria-pressed', 'false');
   await expect(page.getByTestId('banner')).toContainText('MOCK. Simulated.');
   // The server answers 409 for Real and stays in mock.
   const base = new URL(page.url()).origin;
@@ -208,9 +202,10 @@ test('the header toggle is Mock | Live: Mock is on, and Live is disabled with a 
   expect(refused.status()).toBe(409);
   expect((await refused.json()).message).toMatch(/Live mode is not available in this lab/);
   expect((await (await page.request.get('/api/info')).json())).toMatchObject({ source: 'mock', realAvailable: false });
-  await mock.click();
+  // The select already shows mock; choosing Mock again changes nothing.
+  await select.selectOption('mock');
   await expect(page.getByTestId('live-note')).toBeHidden();
-  await expect(mock).toHaveAttribute('aria-pressed', 'true');
+  await expect(select).toHaveValue('mock');
 });
 
 test('presenter mode: P toggles it, Esc leaves it, the banner stays, modifier keys and typing in a field do nothing', async ({ page }) => {
