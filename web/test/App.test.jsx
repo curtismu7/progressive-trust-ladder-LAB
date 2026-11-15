@@ -1,12 +1,15 @@
 import React from 'react';
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { render, screen, within, cleanup, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from '../src/App.jsx';
 import { createApi } from '../src/api.js';
+import { setJsonView } from '../src/components/JsonPane.jsx';
 import { createFakeServer } from './fakeServer.js';
 
 afterEach(() => cleanup());
+// The Form | JSON choice is shared module state (and persisted): every test starts in the Form view.
+beforeEach(() => setJsonView('form'));
 const setup = () => {
   const fake = createFakeServer();
   const api = createApi(fake.fetchImpl);
@@ -149,7 +152,7 @@ describe('the minted proofs and the trace', () => {
     expect(within(screen.getByTestId('proof-stepup')).getByText('Not minted yet.')).toBeInTheDocument();
   });
 
-  it('the trace renders hostile text as text: no element is created and no script runs', async () => {
+  it('the trace renders hostile text as text in both views: no element is created and no script runs', async () => {
     const fake = createFakeServer();
     const hostile = '<img src=x onerror="window.__pwned=1"><script>window.__pwned=2</script>';
     const api = createApi(async (url, init) => {
@@ -157,13 +160,34 @@ describe('the minted proofs and the trace', () => {
       if (url === '/api/state') return { status: 200, json: async () => ({ ...(await r.json()), trace: [{ n: 1, method: 'POST', path: hostile, status: 422, reason: hostile, traceparent: null }] }) };
       return r;
     });
+    const user = userEvent.setup();
     render(<App api={api} />);
-    const trace = await screen.findByTestId('trace');
-    expect(trace.textContent).toContain('<img src=x onerror=');
-    expect(trace.textContent).toContain('<script>window.__pwned=2</script>');
-    expect(trace.querySelector('img,script')).toBeNull();
-    expect(document.querySelector('img[src="x"], script[src]')).toBeNull();
-    expect(window.__pwned).toBeUndefined();
+    const checkText = async () => {
+      const trace = await screen.findByTestId('trace');
+      expect(trace.textContent).toContain('<img src=x onerror=');
+      expect(trace.textContent).toContain('<script>window.__pwned=2</script>');
+      expect(trace.querySelector('img,script')).toBeNull();
+      expect(document.querySelector('img[src="x"], script[src]')).toBeNull();
+      expect(window.__pwned).toBeUndefined();
+    };
+    await screen.findByTestId('trace');
+    expect(screen.getByTestId('trace-box')).toHaveAttribute('data-view', 'form');
+    await checkText();
+    await user.click(within(screen.getByTestId('trace-box')).getByRole('button', { name: 'JSON' }));
+    expect(screen.getByTestId('trace-box')).toHaveAttribute('data-view', 'raw');
+    await checkText();
+  });
+
+  it('the proofs are JSON panes with a Form | JSON toggle: the claims show in the Form view and as JSON text in the JSON view', async () => {
+    const { user } = setup();
+    await user.click(await screen.findByRole('button', { name: 'Sign in' }));
+    const signin = await screen.findByTestId('proof-signin');
+    expect(within(signin).getByRole('button', { name: 'Form' })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(within(signin).getByRole('button', { name: 'JSON' }));
+    const pane = signin.querySelector('pre.json--raw');
+    expect(pane).not.toBeNull();
+    expect(pane.textContent).toContain('"acr": "mock:single"');
+    expect(pane.textContent).toContain('"iss": "https://mock-issuer.example"');
   });
 });
 

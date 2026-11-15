@@ -72,7 +72,7 @@ test('a step down needs a reason and is recorded in the history', async ({ page 
   await page.getByLabel('Reason (required)').fill('customer asked to step down');
   await page.getByRole('button', { name: 'Step down' }).click();
   await expect(rungHeading(page, 'Signed in')).toBeVisible();
-  await expect(page.getByRole('list').filter({ has: page.getByText('customer asked to step down') })).toContainText('explicit');
+  await expect(page.locator('ol.history').filter({ hasText: 'customer asked to step down' })).toContainText('explicit');
 });
 
 test('a risk score that rises refuses a payment that the amount alone would allow', async ({ page }) => {

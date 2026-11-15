@@ -4,6 +4,7 @@ import { App } from './App.jsx';
 import './top-menu/top-menu.css';
 import './components/VerifyMark.css';
 import './styles/standalone-ui.css';
+import './components/JsonPane.css';
 import './styles.css';
 
 createRoot(document.getElementById('root')).render(<App />);
