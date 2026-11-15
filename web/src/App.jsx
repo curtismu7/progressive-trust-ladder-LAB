@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import ShelfLink from "./components/ShelfLink.jsx";
+import Json from "./components/JsonPane.jsx";
 import TopMenu, { applyFontSize } from './top-menu/TopMenu.jsx';
 // Opened from Customer Agent LAB (UC23 routes here): strip below the banner + header Back only; nothing is preselected.
 import ReturnLink from "./return-link/ReturnLink.jsx";
@@ -58,15 +59,7 @@ function ProofList({ proofs }) {
   return rows.map(([title, c]) => (
     <div key={title} data-testid={title === 'Sign-in proof' ? 'proof-signin' : 'proof-stepup'}>
       <h3>{title} (MOCK)</h3>
-      {c ? (
-        <dl className="proof">
-          <dt>sub</dt><dd>{c.sub}</dd>
-          <dt>acr</dt><dd>{c.acr}</dd>
-          <dt>auth_time</dt><dd>{c.auth_time}</dd>
-          <dt>jti</dt><dd>{c.jti}</dd>
-          <dt>iss (MOCK issuer)</dt><dd>{c.iss}</dd>
-        </dl>
-      ) : <p className="muted">Not minted yet.</p>}
+      {c ? <Json value={c} label={`${title} (MOCK)`} hot={['acr']} /> : <p className="muted">Not minted yet.</p>}
     </div>
   ));
 }
@@ -318,8 +311,8 @@ export function App({ api = DEFAULT_API } = {}) {
         <section className="card card--raw" aria-labelledby="raw-h">
           <h2 id="raw-h">Raw trace</h2>
           <p className="muted">Each state change, with its traceparent. Shown as text.</p>
-          <pre data-testid="trace">{trace.length ? JSON.stringify(trace.slice(-8), null, 2) : 'No calls yet.'}</pre>
-          {last && last.raw ? <pre>{JSON.stringify(last.raw, null, 2)}</pre> : null}
+          <Json value={trace.length ? trace.slice(-8) : 'No calls yet.'} label="Raw trace" testId="trace" hot={['rungBefore', 'rungAfter', 'status']} />
+          {last && last.raw ? <Json value={last.raw} label="Last response" hot={['ok', 'rung', 'rungAfter']} /> : null}
         </section>
 
         <section className="card card--raw" aria-labelledby="proof-h">

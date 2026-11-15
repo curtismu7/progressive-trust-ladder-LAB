@@ -50,10 +50,7 @@ input[type="range"] { width: 100%; max-width: 420px; min-height: 40px; accent-co
 /* Lists and raw text. */
 .history, .phone-list { padding-left: 18px; margin: 0; }
 .phone-item { margin-bottom: 10px; }
-.proof { margin: 0 0 8px; }
-.proof dt { font-weight: 700; color: var(--text); }
-.proof dd { margin: 0 0 4px; overflow-wrap: anywhere; font-family: var(--font-mono); font-size: 13px; }
-pre { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px; overflow-x: auto; font-size: 13px; max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; }
+pre { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 13px; max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; }
 
 /* The flow diagram. Colours are the shared diagram-box tokens (dark in both themes); a green or amber group keeps its dark box
    and shows its colour on the border, so a box never needs a colour of its own. */
