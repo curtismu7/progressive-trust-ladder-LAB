@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The header shows this lab's own Verified / In progress mark (set on the demo shelf) beside the Shelf link, through the shared verify-mark vendored from AI-DEMO-Standalone `shared/verify-mark` (#238). Nothing shows when the shelf has no mark for the lab or cannot be reached.
+
 ## 0.4.0 (moved to the -LAB standard, 2026-11-01)
 
 One clean commit in a new repository; no features were added.
