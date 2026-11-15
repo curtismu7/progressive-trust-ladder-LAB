@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import ShelfLink from "./components/ShelfLink.jsx";
 import Json from "./components/JsonPane.jsx";
+import VerifyMark from "./components/VerifyMark.jsx";
 import TopMenu, { applyFontSize } from './top-menu/TopMenu.jsx';
 // Opened from Customer Agent LAB (UC23 routes here): strip below the banner + header Back only; nothing is preselected.
 import ReturnLink from "./return-link/ReturnLink.jsx";
@@ -217,6 +218,7 @@ export function App({ api = DEFAULT_API } = {}) {
               onReset={resetAll}
             >
               <ShelfLink />
+              <VerifyMark id="progressive-trust-ladder" />
             </TopMenu>
             <span className="chip" data-testid="mode">Mode: mock (offline)</span>
             {/* Sign in here is a mock in-page ladder rung in the card below, not a real authentication flow, so it stays outside the menu. */}
