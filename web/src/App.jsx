@@ -13,10 +13,6 @@ const PHONE_POLL_MS = 2000;
 // Rule 2: the banner says what is simulated, on every view, in presenter mode too. The mode it names is the page's mode.
 const BANNER = 'MOCK. Simulated. No bank, no PingOne tenant, no real money. Every proof here is minted by this lab. The mock phone is same-origin, so the requester can reach it: this lab does not show a separate approval channel.';
 const LIVE_FALLBACK = 'Live mode is not available in this lab: it has no live provider or tenant to talk to. It stays in Mock, which runs fully offline.';
-// A button that cannot act right now is aria-disabled, not disabled: it keeps keyboard focus and a press does nothing.
-const Act = ({ off, onAct, children, ...rest }) => (
-  <button type="button" aria-disabled={off ? 'true' : undefined} onClick={() => { if (!off) onAct(); }} {...rest}>{children}</button>
-);
 const TYPING = /^(INPUT|TEXTAREA|SELECT)$/;
 
 const DEFAULT_API = createApi();
@@ -32,20 +28,6 @@ function initialFontStep() {
   try { const f = localStorage.getItem(FONT_KEY); return ["S", "M", "L"].includes(f) ? f : "M"; } catch { return "M"; }
 }
 
-// The talk track is text from the server, rendered as text inside <pre>. It is never parsed as HTML.
-function TalkTrack({ api }) {
-  const [track, setTrack] = useState(null);
-  useEffect(() => {
-    api.talkTrack().then((r) => { setTrack(r.data && typeof r.data.text === 'string' ? r.data : { text: '' }); }).catch(() => setTrack({ text: '' }));
-  }, [api]);
-  return (
-    <section className="card" aria-labelledby="talk-h">
-      <h2 id="talk-h">Talk track</h2>
-      <p className="muted">What to say at each rung, and the presenter path. Shown as text.</p>
-      {track && track.text ? <pre data-testid="talk-track">{track.text}</pre> : <p className="muted">The talk track is not available.</p>}
-    </section>
-  );
-}
 // The words used when no story pack has loaded yet. The story from /api/story (the customer's vertical) replaces them.
 const DEFAULT_WORDS = {
   subtitle: 'A personal agent earns more trust as risk and the amount rise. Each rung needs its own proof.',
@@ -53,17 +35,6 @@ const DEFAULT_WORDS = {
   phoneNote: "This stands in for the customer's device. It is the only place a request is approved or denied.",
   pay: 'Pay', outcome: OUTCOME_TEXT,
 };
-
-// The claims this demo minted (MOCK). Values come from the server state and are rendered as text.
-function ProofList({ proofs }) {
-  const rows = [['Sign-in proof', proofs && proofs.signIn], ['Step-up proof', proofs && proofs.stepUp]];
-  return rows.map(([title, c]) => (
-    <div key={title} data-testid={title === 'Sign-in proof' ? 'proof-signin' : 'proof-stepup'}>
-      <h3>{title} (MOCK)</h3>
-      {c ? <Json value={c} label={`${title} (MOCK)`} hot={['acr']} /> : <p className="muted">Not minted yet.</p>}
-    </div>
-  ));
-}
 
 export function App({ api = DEFAULT_API } = {}) {
   const [snap, setSnap] = useState(null);
@@ -198,35 +169,35 @@ export function App({ api = DEFAULT_API } = {}) {
 
   return (
     <div className={presenter ? 'app app--presenter' : 'app'}>
-      <header>
+      <header className="shell-bar">
+        <span className="shell-brand">
+          <span className="shell-logo" aria-hidden="true">PT</span>
+          <h1>Progressive trust ladder LAB</h1>
+          <span className="shell-badge" data-testid="mode" title="Mode: mock (offline)">Mock</span>
+        </span>
+        <nav className="shell-nav" aria-label="Pages">
+          <a href="#main" aria-current="page">Trust ladder</a>
+        </nav>
+        <TopMenu
+          mode={{ value: 'mock', onChange: switchMode, realAvailable: modeInfo ? modeInfo.realAvailable : null, realHint: modeInfo?.realReason || liveMessage }}
+          theme={{ value: theme, onChange: pickTheme }}
+          fontSize={{ value: fontStep, onChange: setFontStep }}
+          present={{ active: presenter, onToggle: () => setPresenter((v) => !v), label: 'Presenter mode: on (Esc)' }}
+          help={{ href: 'https://github.com/curtismu7/progressive-trust-ladder-LAB#readme' }}
+          version={modeInfo?.version || null}
+          onReset={resetAll}
+        >
+          <ShelfLink />
+          <VerifyMark id="progressive-trust-ladder" />
+        </TopMenu>
+        {/* Sign in here is a mock in-page ladder rung in the card below, not a real authentication flow, so it stays outside the menu. */}
+      </header>
+      <main id="main" tabIndex={-1}>
         <p className="banner" role="note" data-state="mock" data-testid="banner">{BANNER}</p>
         <ReturnLink app="progressive-trust-ladder" />
-        <div className="head">
-          <div>
-            <h1>Progressive trust ladder LAB</h1>
-            <p className="muted head__intro">{words.subtitle}</p>
-            {customer && customer.name ? <p className="muted" data-testid="customer-name">For <span className="customer">{customer.name}</span>.</p> : null}
-          </div>
-          <div className="head__tools">
-            <TopMenu
-              mode={{ value: 'mock', onChange: switchMode, realAvailable: modeInfo ? modeInfo.realAvailable : null, realHint: modeInfo?.realReason || liveMessage }}
-              theme={{ value: theme, onChange: pickTheme }}
-              fontSize={{ value: fontStep, onChange: setFontStep }}
-              present={{ active: presenter, onToggle: () => setPresenter((v) => !v), label: 'Presenter mode: on (Esc)' }}
-              help={{ href: 'https://github.com/curtismu7/progressive-trust-ladder-LAB#readme' }}
-              version={modeInfo?.version || null}
-              onReset={resetAll}
-            >
-              <ShelfLink />
-              <VerifyMark id="progressive-trust-ladder" />
-            </TopMenu>
-            <span className="chip" data-testid="mode">Mode: mock (offline)</span>
-            {/* Sign in here is a mock in-page ladder rung in the card below, not a real authentication flow, so it stays outside the menu. */}
-          </div>
-        </div>
+        <p className="muted head__intro">{words.subtitle}</p>
+        {customer && customer.name ? <p className="muted" data-testid="customer-name">For <span className="customer">{customer.name}</span>.</p> : null}
         <p className="notice" aria-live="polite" data-testid="live-note">{liveNote}</p>
-      </header>
-      <main>
         {loadError && <p role="alert" className="result" data-ok="false">{loadError}</p>}
 
         <div className="grid">
@@ -276,7 +247,7 @@ export function App({ api = DEFAULT_API } = {}) {
                   <li key={p.authReqId} className="phone-item">
                     <div>{words.pay} <strong>${p.binding.replace(/^\$/, '')}</strong> <span className="muted">(expires in {p.expiresIn}s)</span></div>
                     <div className="row">
-                      <button type="button" className="primary" onClick={() => act(() => api.phoneDecide(p.authReqId, 'approve'), 'Phone approve')}>Approve on phone</button>
+                      <button type="button" onClick={() => act(() => api.phoneDecide(p.authReqId, 'approve'), 'Phone approve')}>Approve on phone</button>
                       <button type="button" className="danger" onClick={() => act(() => api.phoneDecide(p.authReqId, 'deny'), 'Phone deny')}>Deny on phone</button>
                     </div>
                   </li>
@@ -332,4 +303,35 @@ export function App({ api = DEFAULT_API } = {}) {
       </main>
     </div>
   );
+}
+
+// Helper components, defined after App so the page's first markup in this file is the simulation banner (P2).
+// A button that cannot act right now is aria-disabled, not disabled: it keeps keyboard focus and a press does nothing.
+const Act = ({ off, onAct, children, ...rest }) => (
+  <button type="button" aria-disabled={off ? 'true' : undefined} onClick={() => { if (!off) onAct(); }} {...rest}>{children}</button>
+);
+
+// The talk track is text from the server, rendered as text inside <pre>. It is never parsed as HTML.
+function TalkTrack({ api }) {
+  const [track, setTrack] = useState(null);
+  useEffect(() => {
+    api.talkTrack().then((r) => { setTrack(r.data && typeof r.data.text === 'string' ? r.data : { text: '' }); }).catch(() => setTrack({ text: '' }));
+  }, [api]);
+  return (
+    <section className="card" aria-labelledby="talk-h">
+      <h2 id="talk-h">Talk track</h2>
+      <p className="muted">What to say at each rung, and the presenter path. Shown as text.</p>
+      {track && track.text ? <pre data-testid="talk-track">{track.text}</pre> : <p className="muted">The talk track is not available.</p>}
+    </section>
+  );
+}
+// The claims this demo minted (MOCK). Values come from the server state and are rendered as text.
+function ProofList({ proofs }) {
+  const rows = [['Sign-in proof', proofs && proofs.signIn], ['Step-up proof', proofs && proofs.stepUp]];
+  return rows.map(([title, c]) => (
+    <div key={title} data-testid={title === 'Sign-in proof' ? 'proof-signin' : 'proof-stepup'}>
+      <h3>{title} (MOCK)</h3>
+      {c ? <Json value={c} label={`${title} (MOCK)`} hot={['acr']} /> : <p className="muted">Not minted yet.</p>}
+    </div>
+  ));
 }

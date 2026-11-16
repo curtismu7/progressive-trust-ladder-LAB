@@ -30,7 +30,7 @@ describe('return link', () => {
     const note = await screen.findByRole('note', NOTE);
     expect(note.textContent).toContain('UC23');
     expect(screen.getByTestId('banner').nextElementSibling).toBe(note);
-    expect(document.querySelector('.head__tools a.return-link, .head__tools button.return-link')).toBeNull(); // the header Back is gone: the TopMenu replaced it
+    expect(document.querySelector('.shell-bar a.return-link, .shell-bar button.return-link')).toBeNull(); // the header Back is gone: the TopMenu replaced it
     expect(screen.getAllByRole('button', { name: /Back to Customer Agent LAB/ })).toHaveLength(1); // the header Back is gone: the TopMenu replaced it
   });
 

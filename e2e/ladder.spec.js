@@ -191,7 +191,8 @@ test('the header toggle is Mock | Live: Mock is on, and Live is disabled with a 
   const select = page.getByTestId('mode-select');
   const live = page.getByTestId('mode-real');
   await expect(select).toHaveValue('mock');
-  await expect(page.getByTestId('mode')).toHaveText('Mode: mock (offline)');
+  await expect(page.getByTestId('mode')).toHaveText('Mock');
+  await expect(page.getByTestId('mode')).toHaveAttribute('title', 'Mode: mock (offline)');
   await expect(page.getByTestId('live-note')).toBeHidden();
   expect(await live.evaluate((o) => o.disabled)).toBe(true);
   await expect(live).toHaveAttribute('title', /Live mode is not available in this lab/);
