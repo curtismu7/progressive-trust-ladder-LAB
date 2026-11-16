@@ -107,7 +107,8 @@ describe('the Mock | Live mode dropdown', () => {
     const modeSelect = await screen.findByTestId('mode-select');
     const live = modeSelect.querySelector('option[value="real"]');
     expect(modeSelect).toHaveValue('mock');
-    expect(screen.getByTestId('mode')).toHaveTextContent('Mode: mock (offline)');
+    expect(screen.getByTestId('mode')).toHaveTextContent(/^Mock$/); // the shell-bar MOCK badge
+    expect(screen.getByTestId('mode')).toHaveAttribute('title', 'Mode: mock (offline)');
     expect(screen.getByTestId('live-note')).toBeEmptyDOMElement();
     await waitFor(() => expect(live).toBeDisabled()); // the server's /api/info says Real is unavailable
     expect(live.getAttribute('title')).toMatch(/not available in this lab/); // with the how-to tooltip
