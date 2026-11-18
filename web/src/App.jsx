@@ -3,6 +3,7 @@ import ShelfLink from "./components/ShelfLink.jsx";
 import Json from "./components/JsonPane.jsx";
 import VerifyMark from "./components/VerifyMark.jsx";
 import TopMenu, { applyFontSize } from './top-menu/TopMenu.jsx';
+import TalkTrackDialog from "./talk-track/TalkTrackDialog.jsx";
 // Opened from Customer Agent LAB (UC23 routes here): strip below the banner + header Back only; nothing is preselected.
 import ReturnLink from "./return-link/ReturnLink.jsx";
 import { createApi } from './api.js';
@@ -40,6 +41,9 @@ export function App({ api = DEFAULT_API } = {}) {
   const [snap, setSnap] = useState(null);
   const [phone, setPhone] = useState([]);
   const [presenter, setPresenter] = useState(false);
+  const [talkOpen, setTalkOpen] = useState(false);
+  const [track, setTrack] = useState(null);
+  useEffect(() => { api.talkTrack().then((r) => { setTrack(r.data && typeof r.data.text === 'string' ? r.data : { text: '' }); }).catch(() => setTrack({ text: '' })); }, [api]);
   const [amount, setAmount] = useState('800');
   const [stepTo, setStepTo] = useState('1');
   const [stepReason, setStepReason] = useState('');
@@ -183,6 +187,7 @@ export function App({ api = DEFAULT_API } = {}) {
           theme={{ value: theme, onChange: pickTheme }}
           fontSize={{ value: fontStep, onChange: setFontStep }}
           present={{ active: presenter, onToggle: () => setPresenter((v) => !v), label: 'Presenter mode: on (Esc)' }}
+          talkTrack={{ active: talkOpen, onToggle: () => setTalkOpen((v) => !v) }}
           help={{ href: 'https://github.com/curtismu7/progressive-trust-ladder-LAB#readme' }}
           version={modeInfo?.version || null}
           onReset={resetAll}
@@ -294,13 +299,14 @@ export function App({ api = DEFAULT_API } = {}) {
           <ProofList proofs={snap ? snap.proofs : null} />
         </section>
 
-        <TalkTrack api={api} />
+        <TalkTrack text={track && typeof track.text === 'string' ? track.text : ''} />
 
         <section className="card" aria-labelledby="diagram-h">
           <h2 id="diagram-h">How the ladder works</h2>
           <DiagramPanel api={api} resetSignal={resetSignal} />
         </section>
       </main>
+      <TalkTrackDialog isOpen={talkOpen} onClose={() => setTalkOpen(false)} talk={(track && typeof track.text === 'string') ? [{ id: 's1', title: 'Talk track', say: track.text }] : []} />
     </div>
   );
 }
@@ -312,16 +318,12 @@ const Act = ({ off, onAct, children, ...rest }) => (
 );
 
 // The talk track is text from the server, rendered as text inside <pre>. It is never parsed as HTML.
-function TalkTrack({ api }) {
-  const [track, setTrack] = useState(null);
-  useEffect(() => {
-    api.talkTrack().then((r) => { setTrack(r.data && typeof r.data.text === 'string' ? r.data : { text: '' }); }).catch(() => setTrack({ text: '' }));
-  }, [api]);
+function TalkTrack({ text = '' }) {
   return (
     <section className="card" aria-labelledby="talk-h">
       <h2 id="talk-h">Talk track</h2>
       <p className="muted">What to say at each rung, and the presenter path. Shown as text.</p>
-      {track && track.text ? <pre data-testid="talk-track">{track.text}</pre> : <p className="muted">The talk track is not available.</p>}
+      {text ? <pre data-testid="talk-track">{text}</pre> : <p className="muted">The talk track is not available.</p>}
     </section>
   );
 }
@@ -335,3 +337,4 @@ function ProofList({ proofs }) {
     </div>
   ));
 }
+

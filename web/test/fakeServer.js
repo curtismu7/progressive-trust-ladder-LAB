@@ -12,7 +12,8 @@ export function createFakeServer() {
 
   const routes = {
     'GET /api/config': () => result(200, { mode: 'mock', live: { available: false, message: 'Live mode is not available in this lab: it has no live provider or tenant to talk to. It stays in Mock, which runs fully offline.' }, customer: { name: null, vertical: null, brand: null } }),
-    // Rule 19: the toggle is server-side. Real is honestly unavailable here.
+    // Rule 19: the toggle is server-side. Real is honestly unavailable here.    'GET /api/talk-track': () => result(200, { text: 'Mock talk track text.' }),
+
     'GET /api/info': () => result(200, { source: 'mock', realAvailable: false, realReason: 'Live mode is not available in this lab: it has no live provider or tenant to talk to. It stays in Mock, which runs fully offline.' }),
     'POST /api/mode': (b) => (b.source === 'real'
       ? result(409, { error: 'real_not_available', message: 'Live mode is not available in this lab: it has no live provider or tenant to talk to. It stays in Mock, which runs fully offline.' })
