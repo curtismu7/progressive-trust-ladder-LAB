@@ -20,7 +20,7 @@ export const VALIDATOR_SHA256 = '3fb0bb6057198b6f8f7573531ac934abf58dd5104158914
 // Hosts the shipped text may name: loopback, the reserved example/invalid names, and public standards pages.
 // json-schema.org: the $schema of the copied pack schema. local.ping-devops.com and this lab's name under it: the family lab-proxy
 // (rulebook: labs are reached at https://local.ping-devops.com:8443), named by the LAB_ALLOWED_HOSTS default and the guard.
-const ALLOWED_HOSTS = /^(127\.0\.0\.1|localhost|[a-z0-9.-]*\.(example|invalid|test)|www\.rfc-editor\.org|openid\.net|www\.w3\.org|json-schema\.org|(progressive-trust-ladder\.)?local\.ping-devops\.com)$/;
+const ALLOWED_HOSTS = /^(127\.0\.0\.1|localhost|[a-z0-9.-]*\.(example|invalid|test)|www\.rfc-editor\.org|openid\.net|www\.w3\.org|json-schema\.org|jwt\.io|(progressive-trust-ladder\.)?local\.ping-devops\.com)$/;
 const SHIPPED = ['server/src', 'server/data', 'web/src', 'core/src', 'scripts', 'content-pack.json', 'docs', 'README.md', 'CLAUDE.md', 'docker-compose.yml', 'Dockerfile'];
 
 function walk(p, out = []) {
